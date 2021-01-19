@@ -1,0 +1,43 @@
+#############################################################################
+# Required Fields                                                           #
+#############################################################################
+developer_token: zkpsla-DeY4n51ZAS-jaYA
+#############################################################################
+# Optional Fields                                                           #
+#############################################################################
+# login_customer_id: 6932286849
+login_customer_id: 5914915486
+
+# user_agent: INSERT_USER_AGENT_HERE
+# partial_failure: True
+validate_only: False
+#############################################################################
+# OAuth2 Configuration                                                      #
+# Below you may provide credentials for either the installed application or #
+# service account flows. Remove or comment the lines for the flow you're    #
+# not using.                                                                #
+#############################################################################
+# The following values configure the client for the installed application
+# flow.
+client_id: 213239199922-v2b19sq9qmv74fpuekdbvuc47rg1qocq.apps.googleusercontent.com
+client_secret: DOKgs5HtyzdLY9y5oKX7g7U-
+refresh_token: 1//03Sdl6D0mSpVhCgYIARAAGAMSNwF-L9IrrCNeJ5pNO_D6qBsBxKKmMzoxO3Lmu02Crl8eYoRrSgW7lbGr8E4npp7qyAA9kA4EhuA
+# """
+# After approving the token enter the verification code (if specified).
+# Code: 4/1AY0e-g7Ww_tAmxdbG05Hs0CpW6R61Hs5J2xGNvhWvcaNvrs-DfZPTDLMBTw
+# Access token: ya29.a0AfH6SMD0Qi-lQdV1084GCwiTyiZJX5J75pT_8GtWxnRUZM1l0TZ3B9GtsvtdG8IjB4QolkJWMdtmgVS6I76PFGz9cEiWODIItPaIL_LA-35SsuyhCLerxtc9dSWQMp16a1swzFR-hlt02OP9WPFIAUov3L6kpkB8AzjR6joxpzU
+# Refresh token: 1//033bE7oOKGa1JCgYIARAAGAMSNwF-L9IrVpiytkDOKdH3FUewCBR3Yb0avpbCATLpnpMkFkon_RQ6tneS_0OLp_5n_Ky3mMHc4TI
+# """
+# The following values configure the client for the service account flow.
+# path_to_private_key_file: INSERT_PATH_TO_JSON_KEY_FILE_HERE
+# delegated_account: INSERT_DOMAIN_WIDE_DELEGATION_ACCOUNT
+#############################################################################
+# ReportDownloader Headers                                                  #
+# Below you may specify boolean values for optional headers that will be    #
+# applied to all requests made by the ReportDownloader utility by default.  #
+#############################################################################
+# report_downloader_headers:
+# skip_report_header: False
+# skip_column_header: False
+# skip_report_summary: False
+# use_raw_enum_values: False
