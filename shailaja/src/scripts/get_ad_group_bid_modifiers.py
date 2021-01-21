@@ -12,41 +12,51 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This example adds an ad group.
+"""This example illustrates how to retrieve ad group bid modifiers."""
 
-To get ad groups, run get_ad_groups.py.
-"""
 
-from first import gads_client
 import argparse
 import sys
-import uuid
-
 import google.ads.google_ads.client
 
 
-def main(client, customer_id, campaign_id):
-    ad_group_service = client.get_service("AdGroupService", version="v6")
-    campaign_service = client.get_service("CampaignService", version="v6")
-
-    # Create ad group.
-    ad_group_operation = client.get_type("AdGroupOperation", version="v6")
-    ad_group = ad_group_operation.create
-    ad_group.name = "Adgroup2 %s" % uuid.uuid4()
-    ad_group.status = client.get_type("AdGroupStatusEnum", version="v6").ENABLED
-    ad_group.campaign = campaign_service.campaign_path(customer_id, campaign_id)
-    ad_group.type = client.get_type(
-        "AdGroupTypeEnum", version="v6"
-    ).SEARCH_STANDARD
-    ad_group.cpc_bid_micros = 10000000
-    
+_DEFAULT_PAGE_SIZE = 1000
 
 
-    # Add the ad group.
+def main(client, customer_id, page_size, ad_group_id=None):
+    ga_service = client.get_service("GoogleAdsService", version="v6")
+
+    query = """
+        SELECT
+          campaign.id,
+          ad_group.id,
+          ad_group_bid_modifier.criterion_id,
+          ad_group_bid_modifier.bid_modifier,
+          ad_group_bid_modifier.device.type
+        FROM ad_group_bid_modifier"""
+
+    if ad_group_id:
+        query += f" WHERE ad_group.id = {ad_group_id}"
+
+    results = ga_service.search(customer_id, query=query, page_size=page_size)
+
+    # Use the enum type to determine the enum name from the value.
+    device_enum = client.get_type("DeviceEnum", version="v6").Device
+
     try:
-        ad_group_response = ad_group_service.mutate_ad_groups(
-            customer_id, [ad_group_operation]
-        )
+        for row in results:
+            print(
+                'Ad group bid modifier with criterion ID "%s", bid modifier '
+                'value "%s", device type "%s" was found in ad group ID "%s" '
+                'of campaign with ID "%s".'
+                % (
+                    row.ad_group_bid_modifier.criterion_id,
+                    row.ad_group_bid_modifier.bid_modifier,
+                    device_enum.Name(row.ad_group_bid_modifier.device.type),
+                    row.ad_group.id,
+                    row.campaign.id,
+                )
+            )
     except google.ads.google_ads.errors.GoogleAdsException as ex:
         print(
             'Request with ID "%s" failed with status "%s" and includes the '
@@ -59,14 +69,12 @@ def main(client, customer_id, campaign_id):
                     print("\t\tOn field: %s" % field_path_element.field_name)
         sys.exit(1)
 
-    print("Created ad group %s." % ad_group_response.results[0].resource_name)
-
 
 if __name__ == "__main__":
     # GoogleAdsClient will read the google-ads.yaml configuration file in the
     # home directory if none is specified.
 
-    main(gads_client, "5661928307", "12118713313")
+    main(gads_client, "5661928307", 500, "12118713313")
 
     """
     google_ads_client = (
@@ -74,7 +82,7 @@ if __name__ == "__main__":
     )
 
     parser = argparse.ArgumentParser(
-        description="Adds an ad group for specified customer and campaign id."
+        description="List ad group bid modifiers for specified customer."
     )
     # The following argument(s) should be provided to run the example.
     parser.add_argument(
@@ -85,10 +93,21 @@ if __name__ == "__main__":
         help="The Google Ads customer ID.",
     )
     parser.add_argument(
-        "-i", "--campaign_id", type=str, required=True, help="The campaign ID."
+        "-a",
+        "--ad_group_id",
+        type=str,
+        required=False,
+        help=(
+            "The ad group ID. Specify this to list ad group "
+            "bid modifiers solely for this ad group ID."
+        ),
     )
     args = parser.parse_args()
 
-    main(google_ads_client, args.customer_id, args.campaign_id)
-
+    main(
+        google_ads_client,
+        args.customer_id,
+        _DEFAULT_PAGE_SIZE,
+        ad_group_id=args.ad_group_id,
+    )
     """

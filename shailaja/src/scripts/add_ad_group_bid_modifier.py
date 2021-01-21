@@ -12,40 +12,49 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This example adds an ad group.
+"""This demonstrates how to add an ad group bid modifier for mobile devices.
 
-To get ad groups, run get_ad_groups.py.
+To get ad group bid modifiers, run get_ad_group_bid_modifiers.py
 """
 
 from first import gads_client
 import argparse
 import sys
-import uuid
 
 import google.ads.google_ads.client
 
 
-def main(client, customer_id, campaign_id):
+# [START add_ad_group_bid_modifier]
+def main(client, customer_id, ad_group_id, bid_modifier_value):
     ad_group_service = client.get_service("AdGroupService", version="v6")
-    campaign_service = client.get_service("CampaignService", version="v6")
+    ad_group_bm_service = client.get_service(
+        "AdGroupBidModifierService", version="v6"
+    )
 
-    # Create ad group.
-    ad_group_operation = client.get_type("AdGroupOperation", version="v6")
-    ad_group = ad_group_operation.create
-    ad_group.name = "Adgroup2 %s" % uuid.uuid4()
-    ad_group.status = client.get_type("AdGroupStatusEnum", version="v6").ENABLED
-    ad_group.campaign = campaign_service.campaign_path(customer_id, campaign_id)
-    ad_group.type = client.get_type(
-        "AdGroupTypeEnum", version="v6"
-    ).SEARCH_STANDARD
-    ad_group.cpc_bid_micros = 10000000
-    
+    # Create ad group bid modifier for mobile devices with the specified ad
+    # group ID and bid modifier value.
+    ad_group_bid_modifier_operation = client.get_type(
+        "AdGroupBidModifierOperation"
+    )
+    ad_group_bid_modifier = ad_group_bid_modifier_operation.create
 
+    # Set the ad group.
+    ad_group_bid_modifier.ad_group = ad_group_service.ad_group_path(
+        customer_id, ad_group_id
+    )
 
-    # Add the ad group.
+    # Set the bid modifier.
+    ad_group_bid_modifier.bid_modifier = bid_modifier_value
+
+    # Sets the device.
+    ad_group_bid_modifier.device.type = client.get_type(
+        "DeviceEnum", version="v6"
+    ).MOBILE
+
+    # Add the ad group bid modifier.
     try:
-        ad_group_response = ad_group_service.mutate_ad_groups(
-            customer_id, [ad_group_operation]
+        ad_group_bm_response = ad_group_bm_service.mutate_ad_group_bid_modifiers(
+            customer_id, [ad_group_bid_modifier_operation]
         )
     except google.ads.google_ads.errors.GoogleAdsException as ex:
         print(
@@ -58,23 +67,30 @@ def main(client, customer_id, campaign_id):
                 for field_path_element in error.location.field_path_elements:
                     print("\t\tOn field: %s" % field_path_element.field_name)
         sys.exit(1)
+        # [END add_ad_group_bid_modifier]
 
-    print("Created ad group %s." % ad_group_response.results[0].resource_name)
+    print(
+        "Created ad group bid modifier: %s."
+        % ad_group_bm_response.results[0].resource_name
+    )
 
 
 if __name__ == "__main__":
     # GoogleAdsClient will read the google-ads.yaml configuration file in the
     # home directory if none is specified.
 
-    main(gads_client, "5661928307", "12118713313")
+    main(gads_client, "5661928307", "12118713313",9)
 
-    """
+    """"
     google_ads_client = (
         google.ads.google_ads.client.GoogleAdsClient.load_from_storage()
     )
 
     parser = argparse.ArgumentParser(
-        description="Adds an ad group for specified customer and campaign id."
+        description=(
+            "Adds an ad group bid modifier to the specified ad group "
+            "ID, for the given customer ID."
+        )
     )
     # The following argument(s) should be provided to run the example.
     parser.add_argument(
@@ -85,10 +101,22 @@ if __name__ == "__main__":
         help="The Google Ads customer ID.",
     )
     parser.add_argument(
-        "-i", "--campaign_id", type=str, required=True, help="The campaign ID."
+        "-a", "--ad_group_id", type=str, required=True, help="The ad group ID."
+    )
+    parser.add_argument(
+        "-b",
+        "--bid_modifier_value",
+        type=float,
+        required=False,
+        default=1.5,
+        help="The bid modifier value.",
     )
     args = parser.parse_args()
 
-    main(google_ads_client, args.customer_id, args.campaign_id)
-
+    main(
+        google_ads_client,
+        args.customer_id,
+        args.ad_group_id,
+        args.bid_modifier_value,
+    )
     """
